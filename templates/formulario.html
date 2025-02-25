@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Servicio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-xl font-bold mb-4">Registro de Servicio al Cliente</h2>
+        <form id="service-form" action="/enviar" method="POST" enctype="multipart/form-data" onsubmit="mostrarMensaje()">
+            <div class="grid grid-cols-2 gap-4">
+                <input type="text" name="Ciudad" id="Ciudad" placeholder="Ciudad" class="border p-2 rounded" required>
+                <input type="date" name="Fecha" id="Fecha" class="border p-2 rounded" required>
+                <input type="text" name="No_Obra" id="No_Obra" placeholder="No. de Obra" class="border p-2 rounded" required>
+                <input type="text" name="Asignado_A" id="Asignado_A" placeholder="Asignado a" class="border p-2 rounded" required>
+                <input type="text" name="Empresa" id="Empresa" placeholder="Empresa" class="border p-2 rounded" required>
+                <input type="text" name="Contacto" id="Contacto" placeholder="Contacto" class="border p-2 rounded" required>
+                <input type="text" name="Tipo_Equipo" id="Tipo_Equipo" placeholder="Tipo de Equipo" class="border p-2 rounded">
+                <input type="text" name="Marca_Año_Serie" id="Marca_Año_Serie" placeholder="Marca / Año / Serie" class="border p-2 rounded">
+                <select name="Clase_Servicio" id="Clase_Servicio" class="border p-2 rounded">
+                    <option>Clase de Servicio</option>
+                    <option>Reparación</option>
+                    <option>Mantenimiento</option>
+                    <option>Inspección</option>
+                    <option>Garantía</option>
+                    <option>Predictivo</option>
+                </select>
+                <textarea name="Descripcion" id="Descripcion" placeholder="Descripción" class="border p-2 rounded col-span-2"></textarea>
+                <input type="datetime-local" name="Fecha_Hora_Ingreso" id="Fecha_Hora_Ingreso" class="border p-2 rounded">
+                <input type="datetime-local" name="Fecha_Hora_Salida" id="Fecha_Hora_Salida" class="border p-2 rounded">
+                <input type="text" name="Empleado_MSI" id="Empleado_MSI" placeholder="Empleado MSI que entrega" class="border p-2 rounded">
+                <input type="text" name="Nombre_Recibe" id="Nombre_Recibe" placeholder="Nombre de quien recibe" class="border p-2 rounded">
+                <input type="email" name="email" id="email" placeholder="Correo destinatario" class="border p-2 rounded" required>
+            </div>
+            <div class="mt-4">
+                <p class="mb-2 font-semibold">Firma de quien recibe:</p>
+                <img id="firma-preview" class="border w-full h-32 bg-white">
+                <input type="hidden" name="firma" id="firma">
+                <button type="button" onclick="guardarFirma()" class="mt-2 bg-gray-500 text-white px-4 py-2 rounded">Firmar</button>
+            </div>
+            <div class="mt-4">
+                <label for="imagenes" class="mb-2 font-semibold">Subir imágenes de evidencia:</label>
+                <input type="file" name="imagenes" id="imagenes" multiple class="border p-2 rounded w-full">
+            </div>
+            <button type="submit" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded w-full">Enviar</button>
+            <button type="button" onclick="refrescarFormulario()" class="mt-2 bg-red-500 text-white px-4 py-2 rounded w-full">Refrescar</button>
+        </form>
+    </div>
+    
+    <script>
+        window.onload = function() {
+            cargarDatos();
+        }
+
+        function mostrarMensaje() {
+            Swal.fire({
+                title: "¡Correo enviado!",
+                text: "El correo ha sido enviado con éxito.",
+                icon: "success",
+                confirmButtonText: "Aceptar"
+            });
+        }
+
+        function guardarFirma() {
+            localStorage.setItem("firma", document.getElementById("firma-preview").src);
+            guardarDatos();
+            window.location.href = "/firma";
+        }
+
+        function guardarDatos() {
+            const campos = document.querySelectorAll("#service-form input, #service-form select, #service-form textarea");
+            campos.forEach(campo => {
+                localStorage.setItem(campo.name, campo.value);
+            });
+        }
+
+        function cargarDatos() {
+            const campos = document.querySelectorAll("#service-form input, #service-form select, #service-form textarea");
+            campos.forEach(campo => {
+                if (localStorage.getItem(campo.name)) {
+                    campo.value = localStorage.getItem(campo.name);
+                }
+            });
+            const firma = localStorage.getItem("firma");
+            if (firma) {
+                document.getElementById("firma-preview").src = firma;
+                document.getElementById("firma").value = firma;
+            }
+        }
+
+        function refrescarFormulario() {
+            localStorage.clear();
+            document.getElementById("service-form").reset();
+            document.getElementById("firma-preview").src = "";
+        }
+    </script>
+</body>
+</html>

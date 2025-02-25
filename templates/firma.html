@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrega a Satisfacción</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #signature-pad { border: 1px solid #000; width: 300px; height: 150px; }
+        button { margin-top: 10px; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h2>Entrega a Satisfacción</h2>
+    <p>Por medio del presente, se certifica la entrega a satisfacción de los trabajos realizados.</p>
+    <canvas id="signature-pad"></canvas>
+    <br>
+    <button onclick="clearSignature()">Borrar Firma</button>
+    <button onclick="saveSignature()">Guardar Firma</button>
+    <script>
+        const canvas = document.getElementById('signature-pad');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+        
+        canvas.addEventListener('mousedown', () => drawing = true);
+        canvas.addEventListener('mouseup', () => {
+            drawing = false;
+            ctx.beginPath();
+        });
+        canvas.addEventListener('mousemove', draw);
+        
+        function draw(event) {
+            if (!drawing) return;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'black';
+            ctx.lineTo(event.offsetX, event.offsetY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(event.offsetX, event.offsetY);
+        }
+        
+        function clearSignature() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        function saveSignature() {
+            const dataURL = canvas.toDataURL();
+            localStorage.setItem("firma", dataURL);
+            window.location.href = "/formulario";
+        }
+    </script>
+</body>
+</html>
