@@ -6,7 +6,7 @@
     <title>Entrega a Satisfacción</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
-        #signature-pad { border: 1px solid #000; width: 300px; height: 150px; }
+        #signature-pad { border: 1px solid #000; width: 300px; height: 150px; touch-action: none; }
         button { margin-top: 10px; padding: 10px; }
     </style>
 </head>
@@ -21,14 +21,28 @@
         const canvas = document.getElementById('signature-pad');
         const ctx = canvas.getContext('2d');
         let drawing = false;
-        
-        canvas.addEventListener('mousedown', () => drawing = true);
-        canvas.addEventListener('mouseup', () => {
+
+        function resizeCanvas() {
+            let ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = 300 * ratio;
+            canvas.height = 150 * ratio;
+            canvas.style.width = "300px";
+            canvas.style.height = "150px";
+            ctx.scale(ratio, ratio);
+        }
+        resizeCanvas();
+
+        function startDrawing(event) {
+            drawing = true;
+            ctx.beginPath();
+            if (event.touches) event.preventDefault();
+        }
+
+        function stopDrawing() {
             drawing = false;
             ctx.beginPath();
-        });
-        canvas.addEventListener('mousemove', draw);
-        
+        }
+
         function draw(event) {
             if (!drawing) return;
             ctx.lineWidth = 2;
@@ -39,16 +53,49 @@
             ctx.beginPath();
             ctx.moveTo(event.offsetX, event.offsetY);
         }
-        
+
+        function drawTouch(event) {
+            if (!drawing) return;
+            event.preventDefault();
+            let touch = event.touches[0];
+            let rect = canvas.getBoundingClientRect();
+            let x = touch.clientX - rect.left;
+            let y = touch.clientY - rect.top;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'black';
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
         function clearSignature() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
-        
+
         function saveSignature() {
-            const dataURL = canvas.toDataURL();
-            localStorage.setItem("firma", dataURL);
-            window.location.href = "/formulario";
+            try {
+                const dataURL = canvas.toDataURL("image/png");
+                if (!dataURL.startsWith("data:image/png")) {
+                    alert("Error al capturar la firma.");
+                    return;
+                }
+                localStorage.setItem("firma", dataURL);
+                window.location.replace("/formulario");
+            } catch (e) {
+                alert("Error al guardar la firma: " + e.message);
+            }
         }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mousemove', draw);
+
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchend', stopDrawing);
+        canvas.addEventListener('touchmove', drawTouch);
     </script>
 </body>
 </html>
+
